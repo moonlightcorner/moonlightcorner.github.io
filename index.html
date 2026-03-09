@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>moon</title>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0608;
+      --bg2: #100c0e;
+      --surface: #160f12;
+      --border: #2e1a22;
+      --accent: #8b2a3a;
+      --accent2: #c94a60;
+      --rose: #e8829a;
+      --text: #d4bfc5;
+      --muted: #7a6068;
+      --white: #f0e6e9;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      line-height: 1.7;
+      cursor: crosshair;
+      overflow-x: hidden;
+    }
+
+    /* Grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.45;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+    /* ── LAYOUT ── */
+    .page {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 24px 100px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      padding: 60px 0;
+    }
+
+    .moon-symbol {
+      font-size: 3rem;
+      opacity: 0;
+      animation: fadeDown 1s 0.2s forwards;
+      filter: drop-shadow(0 0 18px #c94a6088);
+      color: var(--rose);
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+    }
+
+    .hero-name {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: clamp(3.5rem, 12vw, 7rem);
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      color: var(--white);
+      opacity: 0;
+      animation: fadeDown 1s 0.4s forwards;
+      text-shadow:
+        0 0 30px #8b2a3a99,
+        0 0 80px #8b2a3a44,
+        0 2px 4px #000;
+      line-height: 1;
+    }
+
+    .hero-divider {
+      width: 160px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--accent2), transparent);
+      margin: 22px auto;
+      opacity: 0;
+      animation: fadeIn 1s 0.8s forwards;
+    }
+
+    .hero-tagline {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      opacity: 0;
+      animation: fadeIn 1s 1s forwards;
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0;
+      animation: fadeIn 1.5s 1.8s forwards, bob 2s 3s ease-in-out infinite;
+    }
+
+    /* ── SECTIONS ── */
+    .section {
+      margin-bottom: 60px;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .section-label {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: 0.65rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+    }
+
+    /* ── ABOUT ── */
+    .about-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 28px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .about-card::before {
+      content: '☽';
+      position: absolute;
+      top: -10px;
+      right: 20px;
+      font-size: 7rem;
+      color: var(--accent);
+      opacity: 0.06;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .about-name {
+      font-family: 'IM Fell English', serif;
+      font-size: 1.5rem;
+      color: var(--rose);
+      font-style: italic;
+      margin-bottom: 16px;
+    }
+
+    .about-facts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .fact-pill {
+      background: #1e1016;
+      border: 1px solid var(--border);
+      padding: 5px 14px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      transition: border-color 0.3s, color 0.3s;
+    }
+    .fact-pill:hover {
+      border-color: var(--accent2);
+      color: var(--rose);
+    }
+
+    /* ── ACCORDION BUTTONS ── */
+    .accordion {
+      border: 1px solid var(--border);
+      margin-bottom: 2px;
+      overflow: hidden;
+    }
+
+    .accordion-btn {
+      width: 100%;
+      background: var(--surface);
+      border: none;
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      color: var(--text);
+      text-align: left;
+      transition: background 0.3s, color 0.3s;
+    }
+    .accordion-btn:hover {
+      background: #1c1014;
+      color: var(--rose);
+    }
+    .accordion-btn.open {
+      color: var(--rose);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .accordion-icon {
+      font-size: 1.1rem;
+      color: var(--accent2);
+      transition: transform 0.4s;
+      font-family: serif;
+    }
+    .accordion-btn.open .accordion-icon { transform: rotate(180deg); }
+
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1), padding 0.3s;
+      background: var(--bg2);
+    }
+    .accordion-body.open {
+      max-height: 600px;
+    }
+
+    .accordion-inner {
+      padding: 20px 22px 22px;
+    }
+
+    /* ── TAGS ── */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .tag {
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 5px 13px;
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--text);
+      letter-spacing: 0.05em;
+      transition: all 0.3s;
+      cursor: default;
+    }
+    .tag:hover {
+      background: #1e1016;
+      border-color: var(--accent2);
+      color: var(--rose);
+      transform: translateY(-2px);
+    }
+
+    /* Films grid */
+    .films-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 8px;
+    }
+    .film-item {
+      background: #120d0f;
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      font-size: 0.83rem;
+      font-style: italic;
+      color: var(--text);
+      transition: all 0.3s;
+      line-height: 1.3;
+    }
+    .film-item:hover {
+      border-color: var(--accent);
+      color: var(--rose);
+      background: #1a0e13;
+    }
+    .film-item span {
+      display: block;
+      font-size: 0.65rem;
+      font-style: normal;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      margin-bottom: 3px;
+      text-transform: uppercase;
+    }
+
+    /* ── SPOTIFY BUTTON ── */
+    .spotify-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: transparent;
+      border: 1px solid #1DB954;
+      color: #1DB954;
+      padding: 14px 32px;
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: all 0.35s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .spotify-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #1DB954;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.35s ease;
+      z-index: 0;
+    }
+    .spotify-btn:hover::before { transform: scaleX(1); }
+    .spotify-btn:hover { color: #0a0608; }
+    .spotify-btn svg, .spotify-btn span { position: relative; z-index: 1; }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding: 40px 0 20px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      opacity: 0;
+      animation: fadeIn 1s 2s forwards;
+    }
+    .footer-deco {
+      font-size: 1.2rem;
+      color: var(--accent);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    /* ── DECORATIVE CORNER ── */
+    .corner-deco {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-size: 1rem;
+      color: var(--accent);
+      opacity: 0.4;
+      animation: rotate 20s linear infinite;
+      pointer-events: none;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes bob {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(6px); }
+    }
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 480px) {
+      .about-card { padding: 22px 20px; }
+      .films-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="corner-deco">✦</div>
+
+<div class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="moon-symbol">☽ ✦ ☾</div>
+    <h1 class="hero-name">moon</h1>
+    <div class="hero-divider"></div>
+    <p class="hero-tagline">she / her &nbsp;·&nbsp; darkness is just light sleeping</p>
+    <a href="https://open.spotify.com/user/fvr3r2lp72l0mayimk3mb0osi?si=Sc38a6XMQpWwBRDanFwpTg" target="_blank" class="spotify-btn" style="margin-top:28px; opacity:0; animation: fadeIn 1s 1.4s forwards;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;">
+        <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+      </svg>
+      <span>my spotify</span>
+    </a>
+    <div class="scroll-hint">↓ scroll ↓</div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section" id="about">
+    <div class="section-label">about me</div>
+    <div class="about-card">
+      <div class="about-name">hi, i'm moon ☽</div>
+      <p>i'm 17 years old, born on <em>august 30th</em>, and my pronouns are <strong>she/her</strong>. i'm the kind of person who reads poetry at 3am and cries over films from 1994.</p>
+      <div class="about-facts">
+        <div class="fact-pill">☽ 17 years old</div>
+        <div class="fact-pill">✦ 30/08</div>
+        <div class="fact-pill">♀ she/her</div>
+        <div class="fact-pill">⚘ virgo</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERESSES -->
+  <section class="section" id="interests">
+    <div class="section-label">interests & hobbies</div>
+
+    <div class="accordion">
+      <button class="accordion-btn" onclick="toggle(this)">
+        <span>☩ interests</span>
+        <span class="accordion-icon">▾</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-inner">
+          <div class="tags">
+            <div class="tag">classic literature</div>
+            <div class="tag">old music</div>
+            <div class="tag">politics</div>
+            <div class="tag">communism</div>
+            <div class="tag">metal</div>
+            <div class="tag">pets</div>
+            <div class="tag">philosophy</div>
+            <div class="tag">dark academia</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <button class="accordion-btn" onclick="toggle(this)">
+        <span>✂ hobbies</span>
+        <span class="accordion-icon">▾</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-inner">
+          <div class="tags">
+            <div class="tag">diy</div>
+            <div class="tag">sewing</div>
+            <div class="tag">makeup</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <button class="accordion-btn" onclick="toggle(this)">
+        <span>✦ films & series</span>
+        <span class="accordion-icon">▾</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-inner">
+          <div class="films-grid">
+            <div class="film-item"><span>series</span>Skins</div>
+            <div class="film-item"><span>series</span>Shameless</div>
+            <div class="film-item"><span>film</span>Lolita</div>
+            <div class="film-item"><span>film</span>The Perks of Being a Wallflower</div>
+            <div class="film-item"><span>film</span>Dead Poets Society</div>
+            <div class="film-item"><span>film</span>Good Will Hunting</div>
+            <div class="film-item"><span>film</span>Pride & Prejudice</div>
+            <div class="film-item"><span>film</span>Pearl</div>
+            <div class="film-item"><span>film</span>Se7en</div>
+            <div class="film-item"><span>film</span>500 Days of Summer</div>
+            <div class="film-item"><span>film</span>The Crow</div>
+            <div class="film-item"><span>film</span>Girl, Interrupted</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span class="footer-deco">☽ ✦ ☾</span>
+    moon · made with dark energy
+  </footer>
+
+</div>
+
+<script>
+  // Accordion toggle
+  function toggle(btn) {
+    const body = btn.nextElementSibling;
+    const isOpen = btn.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.accordion-btn.open').forEach(b => {
+      b.classList.remove('open');
+      b.nextElementSibling.classList.remove('open');
+    });
+    if (!isOpen) {
+      btn.classList.add('open');
+      body.classList.add('open');
+    }
+  }
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+  // Custom cursor trail (subtle)
+  document.addEventListener('mousemove', (e) => {
+    const dot = document.createElement('div');
+    dot.style.cssText = `
+      position:fixed; left:${e.clientX}px; top:${e.clientY}px;
+      width:4px; height:4px; border-radius:50%;
+      background:#c94a60; pointer-events:none; z-index:9998;
+      transform:translate(-50%,-50%);
+      animation: dotFade 0.6s forwards;
+    `;
+    document.body.appendChild(dot);
+    setTimeout(() => dot.remove(), 600);
+  });
+
+  // Inject keyframe for trail
+  const style = document.createElement('style');
+  style.textContent = `@keyframes dotFade { from { opacity:0.5; transform:translate(-50%,-50%) scale(1); } to { opacity:0; transform:translate(-50%,-50%) scale(0); } }`;
+  document.head.appendChild(style);
+</script>
+</body>
+</html>
